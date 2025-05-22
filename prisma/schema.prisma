@@ -1,0 +1,94 @@
+// schema.prisma
+
+generator client {
+   provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql" 
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          Int       @id @default(autoincrement())
+  email       String    @unique
+  password    String
+  firstName   String?
+  lastName    String?
+  phone       String?
+  birthDate   DateTime?
+  role        Role
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  recruiter   Recruiter?
+  candidate   Candidate?
+}
+
+model Recruiter {
+  id          Int       @id @default(autoincrement())
+  companyName String?
+  position    String?
+  userId      Int       @unique
+ user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  jobOffers   JobOffer[]
+  interviews  Interview[]
+}
+
+model Candidate {
+  id          Int       @id @default(autoincrement())
+  resumeUrl   String?
+  experience  String?
+  userId      Int       @unique
+ user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  applications Application[]
+  interviews   Interview[]
+}
+
+model JobOffer {
+  id          Int       @id @default(autoincrement())
+  title       String
+  description String
+  location    String
+  salary      Decimal   @db.Decimal(10, 2)
+  image       String? 
+  recruiterId Int
+  recruiter   Recruiter @relation(fields: [recruiterId], references: [id])
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  applications Application[]
+}
+
+model Application {
+  id           Int         @id @default(autoincrement())
+  candidateId  Int
+  jobOfferId   Int
+  status       ApplicationStatus @default(PENDING)
+  appliedAt    DateTime    @default(now())
+  
+  candidate    Candidate   @relation(fields: [candidateId], references: [id])
+  jobOffer     JobOffer    @relation(fields: [jobOfferId], references: [id])
+}
+
+model Interview {
+  id            Int       @id @default(autoincrement())
+  candidateId   Int
+  recruiterId   Int
+  scheduledAt   DateTime
+  location      String
+  notes         String?
+
+  candidate     Candidate  @relation(fields: [candidateId], references: [id])
+  recruiter     Recruiter  @relation(fields: [recruiterId], references: [id])
+}
+
+enum Role {
+  Admin
+  recruteur
+  candidat
+}
+
+enum ApplicationStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+}

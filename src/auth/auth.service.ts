@@ -68,7 +68,6 @@ export class AuthService {
     lastName?: string;
     role: Role;
   }) {
-    // Vérifier si l'email existe déjà
     const existingUser = await this.usersService.findOneByEmail(userData.email);
     if (existingUser) {
       throw new UnauthorizedException('Cet email est déjà utilisé');

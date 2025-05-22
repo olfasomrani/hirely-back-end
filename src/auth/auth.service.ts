@@ -73,7 +73,7 @@ export class AuthService {
       throw new UnauthorizedException('Cet email est déjà utilisé');
     }
 
-    // Hasher le mot de passe
+  
     const hashedPassword = await bcrypt.hash(userData.password, 10);
 
     // Créer l'utilisateur

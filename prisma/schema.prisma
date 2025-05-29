@@ -1,20 +1,28 @@
-// schema.prisma
 
 generator client {
-   provider = "prisma-client-js"
+  provider = "prisma-client-js"
 }
+generator erd {
+  provider = "prisma-erd-generator"
+  output   = "./ERD/diagram.pdf"
+}
+
+
+
+
 
 datasource db {
   provider = "postgresql" 
   url      = env("DATABASE_URL")
 }
 
+
 model User {
   id          Int       @id @default(autoincrement())
   email       String    @unique
   password    String
-  firstName   String?
-  lastName    String?
+  firstName   String
+  lastName    String
   phone       String?
   birthDate   DateTime?
   role        Role
@@ -39,9 +47,11 @@ model Candidate {
   resumeUrl   String?
   experience  String?
   userId      Int       @unique
- user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  profil       Profil?  
   applications Application[]
   interviews   Interview[]
+
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model JobOffer {
@@ -76,12 +86,128 @@ model Interview {
   scheduledAt   DateTime
   location      String
   notes         String?
-
   candidate     Candidate  @relation(fields: [candidateId], references: [id])
   recruiter     Recruiter  @relation(fields: [recruiterId], references: [id])
 }
+model Profil {
+  id                   Int                      @id @default(autoincrement())
+  information          Information_General?
+  documents            Documents?
+  formations           Formation[]
+  experiences          Experience[]
+  techSkills           Competence_Technique[]
+  lingSkills           Competence_Linguistique[]
+  persoSkills          Competence_Personnel[]
+  candidateId Int       @unique
+  candidate   Candidate? @relation(fields: [candidateId], references: [id])
+ 
+}
 
-enum Role {
+model Information_General {
+  id          Int     @id @default(autoincrement())
+  firstName   String
+  lastName    String
+  email       String
+  phone       String
+  birthDate   DateTime?
+  adress      String
+  city        String
+  postalCode  Int
+  profilId    Int  @unique
+  profil      Profil?    @relation(fields: [profilId], references: [id])
+}
+
+model Formation {
+  id              Int           @id @default(autoincrement())
+  profilId        Int
+  etablissementId Int
+  domainId        Int
+  diploma         String
+  startYear       String
+  endYear         String
+  mention         Mention
+  description     String
+
+  domain          DomaineEtude  @relation(fields: [domainId], references: [id])
+  etablissement   Etablissement @relation(fields: [etablissementId], references: [id])
+  profil          Profil        @relation(fields: [profilId], references: [id])
+}
+
+model DomaineEtude {
+  id         Int         @id @default(autoincrement())
+  libelle    String      @unique
+  formations Formation[]
+}
+
+model Etablissement {
+  id         Int         @id @default(autoincrement())
+  libelle    String
+  formations Formation[]
+}
+
+model Experience {
+  id          Int     @id @default(autoincrement())
+  profilId    Int
+  company     String 
+  position    String
+  place       String
+  startYear   String
+  endYear     String
+  description String
+
+  profil      Profil  @relation(fields: [profilId], references: [id])
+}
+
+model Competence_Technique {
+  id        Int     @id @default(autoincrement())
+  profilId  Int
+  libelle   String
+  level     Level
+
+  profil    Profil  @relation(fields: [profilId], references: [id])
+}
+
+model Competence_Linguistique {
+  id        Int     @id @default(autoincrement())
+  profilId  Int
+  libelle   String
+  level     Level
+
+  profil    Profil  @relation(fields: [profilId], references: [id])
+}
+
+model Competence_Personnel {
+  id        Int     @id @default(autoincrement())
+  profilId  Int
+  libelle   String
+
+  profil    Profil  @relation(fields: [profilId], references: [id])
+}
+
+model Documents {
+  id            Int     @id @default(autoincrement())
+  cv            String
+  cover_letter  String
+  diploma       String
+  cin           String
+  profilId      Int  @unique
+  profil    Profil?  @relation(fields: [profilId], references: [id])
+}
+
+enum Mention{
+  passable
+  assez_bien
+  bien
+  tres_bien
+  excellent
+}
+ enum Level{
+  debutant
+  intermediare
+  avancée
+ }
+
+ enum Role {
   Admin
   recruteur
   candidat

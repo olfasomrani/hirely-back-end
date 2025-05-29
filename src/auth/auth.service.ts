@@ -4,6 +4,7 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from '../prisma/prisma.service';
 import { UserService } from '../user/user.service';
+import { MailService } from '../mail/mail.service'
 import * as bcrypt from 'bcrypt';
 import { Role } from '@prisma/client';
 
@@ -13,6 +14,7 @@ export class AuthService {
     private prisma: PrismaService,
     private usersService: UserService,
     private jwtService: JwtService,
+    private  mailService: MailService, 
   ) {}
 
   async validateUser(email: string, password: string): Promise<any> {
@@ -26,7 +28,6 @@ export class AuthService {
   }
 
   async login(user: any) {
-    // Récupérer des informations supplémentaires en fonction du rôle
     let additionalInfo = {};
     
     if (user.role === 'recruteur') {
@@ -64,8 +65,8 @@ export class AuthService {
   async register(userData: {
     email: string;
     password: string;
-    firstName?: string;
-    lastName?: string;
+    firstName: string;
+    lastName: string;
     role: Role;
   }) {
     const existingUser = await this.usersService.findOneByEmail(userData.email);
@@ -75,8 +76,6 @@ export class AuthService {
 
   
     const hashedPassword = await bcrypt.hash(userData.password, 10);
-
-    // Créer l'utilisateur
     const newUser = await this.prisma.user.create({
       data: {
         email: userData.email,
@@ -86,8 +85,6 @@ export class AuthService {
         role: userData.role,
       },
     });
-
-    // Créer le profil associé (Recruiter ou Candidate)
     if (userData.role === 'recruteur') {
       await this.prisma.recruiter.create({
         data: {
@@ -101,8 +98,12 @@ export class AuthService {
         },
       });
     }
+    try {
+      await this.mailService.sendWelcomeEmail(newUser.email, newUser.firstName, newUser.lastName);
+    } catch (error) {
+      console.error('Erreur lors de l’envoi de l’email:', error);
 
-    // Nettoyer la réponse
+    }
     const { password, ...result } = newUser;
     return result;
   }

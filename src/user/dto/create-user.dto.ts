@@ -9,7 +9,10 @@ export class CreateUserDto {
   password: string;
 
   @IsNotEmpty()
-  fullName: string;
+  firstName: string;
+
+  @IsNotEmpty()
+  lastName: string;
 
   @IsEnum(Role)
   role: Role; 

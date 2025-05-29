@@ -3,12 +3,12 @@ import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
-async function main() {
+export default async function seedAdmin(prisma: PrismaClient)  {
   await prisma.user.create({
     data: {
       firstName: 'Admin',
       lastName: 'Admin',
-      email: 'admin@example.com',
+      email: 'admin@gmail.com',
       password: 'admin1234', 
       role: 'Admin',
     },
@@ -17,9 +17,3 @@ async function main() {
   console.log('Admin user seeded ✔️');
 }
 
-main()
-  .catch((e) => {
-    console.error(e);
-    process.exit(1);
-  })
-  .finally(() => prisma.$disconnect());

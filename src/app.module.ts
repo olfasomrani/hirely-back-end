@@ -14,8 +14,11 @@ import { PersoSkillsModule } from './perso-skills/perso-skills.module';
 import { MailModule } from './mail/mail.module';
 import { ChatbotModule } from './chatbot/chatbot.module';
 import { FormationModule } from './formation/formation.module';
+import { DomainEtudeModule } from './domain-etude/domain-etude.module';
+import { EtablissementModule } from './etablissement/etablissement.module';
+import { DocumentModule } from './document/document.module';
 
 @Module({
-  imports: [PrismaModule, UserModule, CandidateModule, RecruteurModule, OffreModule, AuthModule, ProfilModule, PersonalInfoModule, ExperienceModule, TechSkillsModule, LangSkillsModule, PersoSkillsModule, MailModule, ChatbotModule, FormationModule],
+  imports: [PrismaModule, UserModule, CandidateModule, RecruteurModule, OffreModule, AuthModule, ProfilModule, PersonalInfoModule, ExperienceModule, TechSkillsModule, LangSkillsModule, PersoSkillsModule, MailModule, ChatbotModule, FormationModule, DomainEtudeModule, EtablissementModule, DocumentModule],
 })
 export class AppModule {}
